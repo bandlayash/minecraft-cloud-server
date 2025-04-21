@@ -3,7 +3,7 @@ name: Minecraft Server
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"  # Every 6 hours
+    - cron: "0 */6 * * *"  # Run every 6 hours
 
 jobs:
   run-server:
@@ -14,26 +14,29 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Install jq
+      run: sudo apt-get update && sudo apt-get install -y jq
+
     - name: Install ngrok
       run: |
         wget https://bin.equinox.io/c/4VmDzA7iaHb/ngrok-stable-linux-amd64.zip
         unzip ngrok-stable-linux-amd64.zip
         ./ngrok authtoken ${{ secrets.NGROK_AUTH_TOKEN }}
 
-    - name: Install jq
-      run: sudo apt-get update && sudo apt-get install -y jq
-
-    - name: Set up server folder
+    - name: Set up server folder and download latest PaperMC
       run: |
         mkdir server
         cd server
         echo "eula=true" > eula.txt
 
-        # Get latest PaperMC version and build dynamically
+        # Set Minecraft version
         VERSION=1.20.4
-        BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
-        DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
 
+        # Get latest build number
+        BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
+
+        # Download PaperMC server
+        DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
         wget "$DOWNLOAD_URL" -O server.jar
 
     - name: Start ngrok tunnel
