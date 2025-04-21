@@ -40,11 +40,16 @@ jobs:
         DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
         wget "$DOWNLOAD_URL" -O server.jar
 
-    - name: Start ngrok tunnel
+    - name: Start ngrok tunnel and show address
       run: |
         ngrok tcp 25565 > ngrok.log &
         sleep 10
-        cat ngrok.log
+
+        # Extract the public TCP URL from ngrok's API
+        TUNNEL_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+
+        echo "🔗 Minecraft server is available at: $TUNNEL_URL"
+
 
     - name: Run Minecraft Server
       run: |
