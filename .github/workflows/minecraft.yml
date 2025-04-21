@@ -25,7 +25,13 @@ jobs:
         mkdir server
         cd server
         echo "eula=true" > eula.txt
-        wget https://api.papermc.io/v2/projects/paper/versions/1.20.4/builds/500/downloads/paper-1.20.4-500.jar -O server.jar
+
+        # Get latest PaperMC version and build dynamically
+        VERSION=1.20.4
+        BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
+        DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
+
+        wget "$DOWNLOAD_URL" -O server.jar
 
     - name: Start ngrok tunnel
       run: |
