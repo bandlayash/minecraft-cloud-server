@@ -72,7 +72,7 @@ jobs:
           echo '${{ secrets.CF_TUNNEL_CREDENTIALS }}' > ~/.cloudflared/${{ secrets.CF_TUNNEL_ID }}.json
           cloudflared tunnel run ${{ secrets.CF_TUNNEL_ID }} > tunnel.log &
           sleep 5
-          echo "🌍 Server should be live at: ${{ secrets.CF_TUNNEL_DOMAIN }}"
+          echo "🌍 Server should be live at: mc."${{ secrets.CF_TUNNEL_DOMAIN#*. }}
 
       - name: Start Minecraft Server
         run: |
