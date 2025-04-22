@@ -1,10 +1,10 @@
-name: Register Cloudflare Tunnel
+name: Create Cloudflare Tunnel
 
 on:
   workflow_dispatch:
 
 jobs:
-  register:
+  create:
     runs-on: ubuntu-latest
     steps:
       - name: Install cloudflared
@@ -13,18 +13,7 @@ jobs:
           chmod +x cloudflared
           sudo mv cloudflared /usr/local/bin/
 
-      - name: Register Cloudflare Tunnel
+      - name: Show login notice
         run: |
-          mkdir -p ~/.cloudflared
-          # Paste your cloudflared command from the Zero Trust dashboard here:
-          cloudflared tunnel --no-autoupdate run --token eyJhIjoiY2NmNGEwZTI4ZTExOThlYTVmNTE2YmE2MjM3YTU0OTYiLCJ0IjoiOGQ3NzQwZjQtOTliMS00Y2MyLWI2MDEtYTk2ZWU0N2FiOTQ1IiwicyI6Ik5EazNaV0UxTW1VdFpHSTFPQzAwWW1NNExUZzRNelF0WldKalltRmtZV1kzWTJabSJ9 &
-          sleep 10
-          echo "✅ Tunnel registered."
-
-      - name: List credentials file
-        run: ls -al ~/.cloudflared
-
-      - name: Show credentials content
-        run: |
-          echo "Copy the following JSON and save it as CF_TUNNEL_CREDENTIALS secret:"
-          cat ~/.cloudflared/*.json
+          echo "❌ This workflow cannot create a tunnel."
+          echo "✅ Please run 'cloudflared login' and 'cloudflared tunnel create' locally to register the tunnel and get the credentials JSON."
