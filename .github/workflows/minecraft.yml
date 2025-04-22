@@ -41,7 +41,7 @@ jobs:
 
           cat > server/server.properties <<EOL
           level-name=cloud_world
-          level-seed=8675309
+          level-seed=-7504966591796227902
           gamemode=survival
           difficulty=normal
           enable-command-block=true
