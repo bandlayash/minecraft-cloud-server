@@ -51,7 +51,7 @@ jobs:
           echo "${{ secrets.MC_USERNAME }}" > server/ops.txt
 
       - name: Restore world (if any)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: world-save
           path: .
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload world
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: world-save
           path: world.zip
