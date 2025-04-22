@@ -17,7 +17,7 @@ jobs:
         run: |
           mkdir -p ~/.cloudflared
           # Paste your cloudflared command from the Zero Trust dashboard here:
-          cloudflared tunnel --no-autoupdate run --token  &
+          cloudflared tunnel --no-autoupdate run --token eyJhIjoiY2NmNGEwZTI4ZTExOThlYTVmNTE2YmE2MjM3YTU0OTYiLCJ0IjoiOGQ3NzQwZjQtOTliMS00Y2MyLWI2MDEtYTk2ZWU0N2FiOTQ1IiwicyI6Ik5EazNaV0UxTW1VdFpHSTFPQzAwWW1NNExUZzRNelF0WldKalltRmtZV1kzWTJabSJ9 &
           sleep 10
           echo "✅ Tunnel registered."
 
