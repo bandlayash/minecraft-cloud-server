@@ -69,10 +69,10 @@ jobs:
       - name: Start Cloudflare Tunnel
         run: |
           mkdir -p ~/.cloudflared
-          echo '${{ secrets.CF_TUNNEL_CREDENTIALS }}' > ~/.cloudflared/${{ secrets.CF_TUNNEL_ID }}.json
-          cloudflared tunnel run ${{ secrets.CF_TUNNEL_ID }} > tunnel.log &
+          echo '{"AccountTag":"ccf4a0e28e1198ea5f516ba6237a5496","TunnelSecret":"mN2M+xIaMVg9SAGGfrHjCxwmQ6PxTVyQXpreN/UYTBk=","TunnelID":"9cf8f8c2-121b-4876-87b0-eec4d0821423","Endpoint":""}' > ~/.cloudflared/9cf8f8c2-121b-4876-87b0-eec4d0821423.json
+          cloudflared tunnel run 9cf8f8c2-121b-4876-87b0-eec4d0821423 > tunnel.log &
           sleep 5
-          echo "🌍 Server should be live at: ${{ secrets.CF_TUNNEL_DOMAIN }}"
+          echo "🌍 Server should be live at: yb.boonchusmc.xyz"
 
 
       - name: Start Minecraft Server
