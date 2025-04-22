@@ -41,7 +41,7 @@ jobs:
 
           cat > server/server.properties <<EOL
           level-name=cloud_world
-          level-seed=-7504966591796227902
+          level-seed=8675309
           gamemode=survival
           difficulty=normal
           enable-command-block=true
@@ -51,7 +51,7 @@ jobs:
           echo "${{ secrets.MC_USERNAME }}" > server/ops.txt
 
       - name: Restore world (if any)
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v3.1.2
         with:
           name: world-save
           path: .
@@ -85,7 +85,7 @@ jobs:
 
       - name: Upload world
         if: always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v3.1.3
         with:
           name: world-save
           path: world.zip
