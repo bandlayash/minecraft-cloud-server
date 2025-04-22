@@ -51,10 +51,12 @@ jobs:
           echo "${{ secrets.MC_USERNAME }}" > server/ops.txt
 
       - name: Restore world (if any)
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: world-save
           path: .
+
 
       - name: Unzip world
         run: |
@@ -81,7 +83,13 @@ jobs:
         if: always()
         run: |
           cd server
-          zip -r ../world.zip world/
+          echo "📁 Directory contents:"
+          ls -al
+          if [ -d world ]; then
+            zip -r ../world.zip world/
+          else
+            echo "⚠️ No world/ folder to archive. Minecraft server may not have started properly."
+          fi
 
       - name: Upload world
         if: always()
