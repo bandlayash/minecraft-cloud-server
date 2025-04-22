@@ -3,7 +3,7 @@ name: Minecraft Server
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"  # Run every 6 hours
+    - cron: "0 */6 * * *"  # Every 6 hours
 
 jobs:
   run-server:
@@ -30,26 +30,33 @@ jobs:
         cd server
         echo "eula=true" > eula.txt
 
-        # Set Minecraft version
-        VERSION=1.20.4
-
-        # Get latest build number
+        # Get latest PaperMC version and build
+        VERSION=$(curl -s https://api.papermc.io/v2/projects/paper | jq -r '.versions[-1]')
         BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
-
-        # Download PaperMC server
         DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
         wget "$DOWNLOAD_URL" -O server.jar
+
+        # Create server.properties
+        cat > server.properties <<EOL
+        level-name=cloud_world
+        level-seed=-7504966591796227902
+        gamemode=survival
+        difficulty=normal
+        enable-command-block=true
+        online-mode=true
+        EOL
+
+        # Set OP username from GitHub secret
+        echo "${{ secrets.MC_USERNAME }}" > ops.txt
 
     - name: Start ngrok tunnel and show address
       run: |
         ngrok tcp 25565 > ngrok.log &
         sleep 10
 
-        # Extract the public TCP URL from ngrok's API
+        # Extract and print tunnel URL
         TUNNEL_URL=$(curl --silent http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')
-
         echo "🔗 Minecraft server is available at: $TUNNEL_URL"
-
 
     - name: Run Minecraft Server
       run: |
