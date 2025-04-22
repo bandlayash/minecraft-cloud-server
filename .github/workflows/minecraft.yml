@@ -3,7 +3,7 @@ name: Minecraft Server
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 */6 * * *"  # Every 6 hours
+    - cron: "0 */6 * * *"  # every 6 hours
 
 jobs:
   run-server:
@@ -11,85 +11,81 @@ jobs:
     timeout-minutes: 355
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - name: Install dependencies (jq + unzip)
-      run: sudo apt-get update && sudo apt-get install -y jq unzip
+      - name: Install dependencies (jq + unzip)
+        run: sudo apt-get update && sudo apt-get install -y jq unzip
 
-    - name: Install cloudflared
-      run: |
-        curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
-        chmod +x cloudflared
-        sudo mv cloudflared /usr/local/bin/
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
 
-    - name: Set up Java 21
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '21'
+      - name: Set up Java 21
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '21'
 
-    - name: Set up server directory
-      run: mkdir server
+      - name: Set up Minecraft server folder
+        run: |
+          mkdir server
+          echo "eula=true" > server/eula.txt
 
-    - name: Download latest PaperMC
-      run: |
-        VERSION=$(curl -s https://api.papermc.io/v2/projects/paper | jq -r '.versions[-1]')
-        BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
-        DOWNLOAD_URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
-        wget "$DOWNLOAD_URL" -O server/server.jar
-        echo "eula=true" > server/eula.txt
+          VERSION=$(curl -s https://api.papermc.io/v2/projects/paper | jq -r '.versions[-1]')
+          BUILD=$(curl -s https://api.papermc.io/v2/projects/paper/versions/$VERSION | jq -r '.builds[-1]')
+          URL="https://api.papermc.io/v2/projects/paper/versions/$VERSION/builds/$BUILD/downloads/paper-$VERSION-$BUILD.jar"
+          wget "$URL" -O server/server.jar
 
-    - name: Configure server.properties
-      run: |
-        cat > server/server.properties <<EOL
-        level-name=cloud_world
-        level-seed=-7504966591796227902
-        gamemode=survival
-        difficulty=normal
-        enable-command-block=true
-        online-mode=true
-        EOL
+          cat > server/server.properties <<EOL
+          level-name=cloud_world
+          level-seed=-7504966591796227902
+          gamemode=survival
+          difficulty=normal
+          enable-command-block=true
+          online-mode=true
+          EOL
 
-    - name: Set OP user
-      run: echo "${{ secrets.MC_USERNAME }}" > server/ops.txt
+          echo "${{ secrets.MC_USERNAME }}" > server/ops.txt
 
-    - name: Restore world from last run
-      uses: actions/download-artifact@v3
-      with:
-        name: world-save
-        path: .
+      - name: Restore world (if any)
+        uses: actions/download-artifact@v3
+        with:
+          name: world-save
+          path: .
 
-    - name: Unzip world save
-      run: |
-        if [ -f world.zip ]; then
-          unzip world.zip -d server/
-        else
-          echo "No previous world found. Starting new world."
-        fi
+      - name: Unzip world
+        run: |
+          if [ -f world.zip ]; then
+            unzip world.zip -d server/
+          else
+            echo "🌱 No previous world found. Starting fresh."
+          fi
 
-    - name: Start Cloudflare Tunnel
-      run: |
-        mkdir -p ~/.cloudflared
-        echo '${{ secrets.CF_TUNNEL_CREDENTIALS }}' > ~/.cloudflared/${{ secrets.CF_TUNNEL_ID }}.json
-        cloudflared tunnel run ${{ secrets.CF_TUNNEL_ID }} > tunnel.log &
-        sleep 5
-        echo "🌐 Server is live at: ${{ secrets.CF_TUNNEL_DOMAIN }}"
+      - name: Start Cloudflare Tunnel
+        run: |
+          mkdir -p ~/.cloudflared
+          echo '${{ secrets.CF_TUNNEL_CREDENTIALS }}' > ~/.cloudflared/${{ secrets.CF_TUNNEL_ID }}.json
+          cloudflared tunnel run ${{ secrets.CF_TUNNEL_ID }} > tunnel.log &
+          sleep 5
+          echo "🌍 Server should be live at: ${{ secrets.CF_TUNNEL_DOMAIN }}"
 
-    - name: Start Minecraft server
-      run: |
-        cd server
-        java -Xmx2G -Xms2G -jar server.jar nogui
+      - name: Start Minecraft Server
+        run: |
+          cd server
+          java -Xmx2G -Xms2G -jar server.jar nogui
 
-    - name: Archive world after shutdown
-      if: always()
-      run: |
-        cd server
-        zip -r ../world.zip world/
+      - name: Archive world after shutdown
+        if: always()
+        run: |
+          cd server
+          zip -r ../world.zip world/
 
-    - name: Upload world save
-      if: always()
-      uses: actions/upload-artifact@v3
-      with:
-        name: world-save
-        path: world.zip
+      - name: Upload world
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: world-save
+          path: world.zip
