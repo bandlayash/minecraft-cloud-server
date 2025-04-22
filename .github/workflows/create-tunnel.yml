@@ -1,0 +1,19 @@
+name: Create Cloudflare Tunnel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
+
+      - name: Show login notice
+        run: |
+          echo "❌ This workflow cannot create a tunnel."
+          echo "✅ Please run 'cloudflared login' and 'cloudflared tunnel create' locally to register the tunnel and get the credentials JSON."
