@@ -69,19 +69,28 @@ jobs:
       - name: Start Cloudflare Tunnel
         run: |
           mkdir -p ~/.cloudflared
-          echo '{"AccountTag":"ccf4a0e28e1198ea5f516ba6237a5496","TunnelSecret":"mN2M+xIaMVg9SAGGfrHjCxwmQ6PxTVyQXpreN/UYTBk=","TunnelID":"9cf8f8c2-121b-4876-87b0-eec4d0821423","Endpoint":""}' > ~/.cloudflared/9cf8f8c2-121b-4876-87b0-eec4d0821423.json
-          echo '-----BEGIN ARGO TUNNEL TOKEN-----
+
+          cat > ~/.cloudflared/9cf8f8c2-121b-4876-87b0-eec4d0821423.json <<EOF
+          {"AccountTag":"ccf4a0e28e1198ea5f516ba6237a5496","TunnelSecret":"mN2M+xIaMVg9SAGGfrHjCxwmQ6PxTVyQXpreN/UYTBk=","TunnelID":"9cf8f8c2-121b-4876-87b0-eec4d0821423","Endpoint":""}
+          EOF
+
+          cat > ~/.cloudflared/cert.pem <<EOF
+          -----BEGIN ARGO TUNNEL TOKEN-----
           eyJhIjoiY2NmNGEwZTI4ZTExOThlYTVmNTE2YmE2MjM3YTU0OTYiLCJ0IjoiOWNm
           OGY4YzItMTIxYi00ODc2LTg3YjAtZWVjNGQwODIxNDIzIiwicyI6IlpqSXpOamRq
           TlRFdE1EZ3hNaTAwTmpnd0xUbG1aVGt0TVRCbE9Ea3hZemt3WVdWayJ9
-          -----END ARGO TUNNEL TOKEN-----' > ~/.cloudflared/cert.pem
-          echo 'tunnel: 9cf8f8c2-121b-4876-87b0-eec4d0821423
-                credentials-file: /home/runner/.cloudflared/9cf8f8c2-121b-4876-87b0-eec4d0821423.json
-                
-                ingress:
-                  - hostname: yb.boonchusmc.xyz
-                    service: tcp://localhost:25565
-                  - service: http_status:404' > ~/.cloudflared/config.yml
+          -----END ARGO TUNNEL TOKEN-----
+          EOF
+         
+          cat > ~/.cloudflared/config.yml <<EOF
+          tunnel: 9cf8f8c2-121b-4876-87b0-eec4d0821423
+          credentials-file: /home/runner/.cloudflared/9cf8f8c2-121b-4876-87b0-eec4d0821423.json
+      
+          ingress:
+          - hostname: yb.boonchusmc.xyz
+          service: tcp://localhost:25565
+          - service: http_status:404
+          EOF
 
           cloudflared tunnel run 9cf8f8c2-121b-4876-87b0-eec4d0821423 > tunnel.log &
           sleep 5
