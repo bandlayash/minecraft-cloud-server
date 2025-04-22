@@ -1,0 +1,30 @@
+name: Register Cloudflare Tunnel
+
+on:
+  workflow_dispatch:
+
+jobs:
+  register:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install cloudflared
+        run: |
+          curl -L https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
+
+      - name: Register Cloudflare Tunnel
+        run: |
+          mkdir -p ~/.cloudflared
+          # Paste your cloudflared command from the Zero Trust dashboard here:
+          cloudflared tunnel --no-autoupdate run --token <YOUR_TOKEN_HERE> &
+          sleep 10
+          echo "✅ Tunnel registered."
+
+      - name: List credentials file
+        run: ls -al ~/.cloudflared
+
+      - name: Show credentials content
+        run: |
+          echo "Copy the following JSON and save it as CF_TUNNEL_CREDENTIALS secret:"
+          cat ~/.cloudflared/*.json
